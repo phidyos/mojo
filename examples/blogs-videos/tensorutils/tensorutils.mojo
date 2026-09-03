@@ -12,7 +12,7 @@
 # ===----------------------------------------------------------------------=== #
 
 from tensor import Tensor
-from math import trunc, mod
+from math import trunc, mod, abs
 fn tensorprint[type: DType](t: Tensor[type])->None:
     let rank = t.rank()
     var dim0:Int=0
@@ -54,9 +54,12 @@ fn tensorprint[type: DType](t: Tensor[type])->None:
                     val = t[j,k]
                 if rank==3:
                     val = t[i,j,k]
-                let int_str = String(trunc(val).cast[DType.int32]())
-                let float_str = String(mod(val,1))
-                let s = int_str+"."+float_str[2:6]
+                let int_part = trunc(val).cast[DType.int32]()
+                let int_str = String(int_part)
+                let frac_val = mod(val, 1)
+                let frac_str = String(abs(frac_val))
+                # frac_str is like "0.123456" — extract digits after "0."
+                let s = int_str + "." + frac_str[2:6]
                 if k==0:
                     print_no_newline(s)
                 else:

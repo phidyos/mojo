@@ -43,7 +43,7 @@ struct ArrayInput:
 fn reduce_sum_naive(data: ArrayInput, size: Int) -> Float32:
     var sum = data[0]
     var c: Float32 = 0.0
-    for i in range(size):
+    for i in range(1, size):
         let y = data[i] - c
         let t = sum + y
         c = (t - sum) - y
@@ -60,17 +60,16 @@ fn benchmark_naive_reduce_sum(size: Int) -> Float32:
     @always_inline
     @parameter
     fn test_fn():
-        _ = reduce_sum_naive(A, size)
+        mySum = reduce_sum_naive(A, size)
 
     let bench_time = Float64(Benchmark().run[test_fn]())
+    _ = bench_time  # bench_time available for future use
     return mySum
 
 
 fn benchmark_stdlib_reduce_sum(size: Int) -> Float32:
     # Allocate a Buffer and then use the Mojo stdlib Reduction class
-    # TODO: Use globals
-    # alias numElem = size
-    alias numElem = 1 << 30
+    alias numElem = size
     # Can use either stack allocation or heap
     # see stackalloc
     # var A = Buffer[numElem, DType.float32].stack_allocation()
@@ -92,6 +91,11 @@ fn benchmark_stdlib_reduce_sum(size: Int) -> Float32:
         mySum = sum[numElem, DType.float32](A)
 
     let bench_time = Float64(Benchmark().run[test_fn]())
+    _ = bench_time  # bench_time available for future use
+
+    # Free allocated memory to prevent leak
+    B.free()
+
     return mySum
 
 
